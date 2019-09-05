@@ -1,10 +1,10 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/*
+/**
  *
  * @author ManhHD
  *

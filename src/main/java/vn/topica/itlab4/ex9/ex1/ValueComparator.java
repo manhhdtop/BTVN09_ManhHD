@@ -1,11 +1,11 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.util.Comparator;
 import java.util.Map;
 
 /**
  *
- * @author nhoks
+ * @author ManhHD
  *
  */
 public class ValueComparator implements Comparator<String>

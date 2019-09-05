@@ -1,11 +1,11 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  *
- * @author nhoks
+ * @author ManhHD
  *
  */
 public class Utils
@@ -49,8 +49,7 @@ public class Utils
 	{
 		if (s.length() > 0)
 		{
-			s = s.toLowerCase().trim();
-			s = s.replaceAll("\\s+", " ");
+			s = s.toLowerCase().trim().replaceAll("\\s+", " ");
 			String[] arr = s.split("\\s");
 			for (int i = 0; i < arr.length; i++)
 			{

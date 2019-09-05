@@ -1,4 +1,4 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.io.FileNotFoundException;
 import java.text.ParseException;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/*
+/**
  *
  * @author ManhHD
  *

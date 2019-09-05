@@ -1,4 +1,4 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-/*
+/**
  *
  * @author ManhHD
  *

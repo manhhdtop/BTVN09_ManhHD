@@ -1,16 +1,16 @@
-package vn.topica.itlab4.ex8;
+package vn.topica.itlab4.ex9.ex1;
 
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/*
+/**
  *
  * @author ManhHD
  *
  */
-public class Ex1_2
+public class Ex1_1
 {
 	private static String path = System.getProperty("user.dir");
 	private static String input1 = path + "/resource/input1.txt";
@@ -22,7 +22,7 @@ public class Ex1_2
 		{
 			String s = FileUtil.readFile(input1);
 			
-			List<Device> devices = Utils.convertObject(s, true);
+			List<Device> devices = Utils.convertObject(s, false);
 			
 			/*
 			 * Sort devices list by warranty year
@@ -36,7 +36,7 @@ public class Ex1_2
 					{
 						return 0;
 					}
-					if (o1.getWarrantyYear() < o2.getWarrantyYear())
+					if (o1.getWarrantyYear() > o2.getWarrantyYear())
 					{
 						return 1;
 					}
