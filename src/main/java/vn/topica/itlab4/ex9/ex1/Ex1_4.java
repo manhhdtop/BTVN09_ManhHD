@@ -1,11 +1,7 @@
 package vn.topica.itlab4.ex9.ex1;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  *
@@ -14,6 +10,9 @@ import java.util.TreeMap;
  */
 public class Ex1_4
 {
+	/**
+	 * path is context path of project
+	 */
 	private static String path = System.getProperty("user.dir");
 	private static String input1 = path + "/resource/input1.txt";
 	private static String output1 = path + "/resource/output1.txt";
@@ -39,24 +38,24 @@ public class Ex1_4
 	 */
 	private static List<String> count(List<Device> devices)
 	{
-		Map<String, Integer> keyword = new HashMap<String, Integer>();
+		Map<String, Integer> keyword = new HashMap<>();
 		for (Device device : devices)
 		{
 			String name = device.getOwner();
 			String[] arr = Utils.standardizedName(name).split("\\s");
-			for (int i = 0; i < arr.length; i++)
+			for (String s : arr)
 			{
-				if (keyword.containsKey(arr[i]))
+				if (keyword.containsKey(s))
 				{
-					keyword.computeIfPresent(arr[i], (k, v) -> v + 1);
+					keyword.computeIfPresent(s, (k, v) -> v + 1);
 				}
 				else
 				{
-					keyword.put(arr[i], 1);
+					keyword.put(s, 1);
 				}
 			}
 		}
-		TreeMap<String, Integer> sorted_map = new TreeMap<String, Integer>(new ValueComparator(keyword));
+		TreeMap<String, Integer> sorted_map = new TreeMap<>(new ValueComparator(keyword));
 		sorted_map.putAll(keyword);
 		
 		List<String> result = new ArrayList<>();

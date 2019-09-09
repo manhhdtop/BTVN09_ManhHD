@@ -8,12 +8,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- *
  * @author ManhHD
- *
  */
 public class Ex1_3
 {
+	/**
+	 * path is context path of project
+	 */
 	private static String path = System.getProperty("user.dir");
 	private static String input1 = path + "/resource/input1.txt";
 	private static String output1 = path + "/resource/output1.txt";
@@ -35,14 +36,14 @@ public class Ex1_3
 	}
 	
 	/**
-	 * 
+	 *
 	 */
 	private static List<Device> search(List<Device> devices)
 	{
 		String keyword = "TOPICA";
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date startDate = new Date();
-		Date endDate = new Date();
+		Date startDate;
+		Date endDate;
 		try
 		{
 			startDate = sdf.parse("31/10/2018");
@@ -57,7 +58,7 @@ public class Ex1_3
 		List<Device> result = new ArrayList<>();
 		for (Device device : devices)
 		{
-			if (device.getCode().toLowerCase().indexOf(keyword.toLowerCase()) != -1)
+			if (device.getCode().toLowerCase().contains(keyword.toLowerCase()))
 			{
 				if (device.getInputDate().after(startDate) && device.getInputDate().before(endDate))
 				{

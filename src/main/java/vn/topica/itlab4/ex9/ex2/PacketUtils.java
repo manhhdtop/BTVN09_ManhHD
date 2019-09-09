@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- *
  * @author ManhHd
- *
  */
 public class PacketUtils
 {
+	private static byte[] eof = {(byte) -1};
+	
 	public static byte[] toByteArray4(int value)
 	{
 		ByteBuffer buffer = ByteBuffer.allocate(4);
@@ -28,26 +28,6 @@ public class PacketUtils
 		byte[] bytes = buffer.putShort(value).array();
 		buffer.flip();
 		return bytes;
-	}
-	
-	public static byte[] concatBytes(byte[]... arrays)
-	{
-		int totalLength = 0;
-		for (int i = 0; i < arrays.length; i++)
-		{
-			totalLength += arrays[i].length;
-		}
-		
-		byte[] result = new byte[totalLength];
-		
-		int currentIndex = 0;
-		for (int i = 0; i < arrays.length; i++)
-		{
-			System.arraycopy(arrays[i], 0, result, currentIndex, arrays[i].length);
-			currentIndex += arrays[i].length;
-		}
-		
-		return result;
 	}
 	
 	public static byte[] getByte(TcpPacket packet)
@@ -65,7 +45,7 @@ public class PacketUtils
 		
 		byte[] packet_data = PacketUtils.concatBytes(cmdCode, version, bytes);
 		byte[] lengthOfMessage = PacketUtils.toByteArray4(packet_data.length + 4);
-		packet_data = PacketUtils.concatBytes(lengthOfMessage, packet_data);
+		packet_data = PacketUtils.concatBytes(lengthOfMessage, packet_data, eof);
 		return packet_data;
 	}
 	
@@ -73,23 +53,50 @@ public class PacketUtils
 	{
 		TcpPacket packet = new TcpPacket();
 		int index = 0;
-		int i = getInt(bytes, index, index += 4);
-		packet.setLengthOfMessage(i);
-		short c = getShort(bytes, index, index += 2);
-		packet.setCmdCode(c);
-		c = getShort(bytes, index, index += 2);
-		packet.setVersion(c);
-		
-		ArrayList<TLV> tlvs = new ArrayList<>();
-		while (index < bytes.size())
+		try
 		{
-			short tag = getShort(bytes, index, index += 2);
-			short length = getShort(bytes, index, index += 2);
-			String value = getString(bytes, index, index += length);
-			tlvs.add(new TLV(tag, value));
+			byte[] arr = toByteArray(bytes);
+			int i = getInt(arr, index, index += 4);
+			packet.setLengthOfMessage(i);
+			short c = getShort(arr, index, index += 2);
+			packet.setCmdCode(c);
+			c = getShort(arr, index, index += 2);
+			packet.setVersion(c);
+			
+			ArrayList<TLV> tlvs = new ArrayList<>();
+			while (index < bytes.size())
+			{
+				short tag = getShort(arr, index, index += 2);
+				short length = getShort(arr, index, index += 2);
+				String value = getString(arr, index, index += length);
+				tlvs.add(new TLV(tag, value));
+			}
+			packet.setTlvs(tlvs);
 		}
-		packet.setTlvs(tlvs);
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			
+		}
 		return packet;
+	}
+	
+	public static byte[] concatBytes(byte[]... arrays)
+	{
+		int totalLength = 0;
+		for (byte[] array : arrays)
+		{
+			totalLength += array.length;
+		}
+		byte[] result = new byte[totalLength];
+		
+		int currentIndex = 0;
+		for (byte[] array : arrays)
+		{
+			System.arraycopy(array, 0, result, currentIndex, array.length);
+			currentIndex += array.length;
+		}
+		
+		return result;
 	}
 	
 	public static byte[] concatBytes(ArrayList<ChildPacket> packets) //  concatenate byte arrays
@@ -120,50 +127,45 @@ public class PacketUtils
 	}
 	
 	/**
-	 * 
+	 *
 	 */
-	private static int getInt(ArrayList<Byte> packet, int begin, int end)
+	private static int getInt(byte[] bytes, int begin, int end)
 	{
-		byte[] bytes = new byte[packet.size()];
-		for (int i = 0; i < packet.size(); i++)
-		{
-			bytes[i] = packet.get(i).byteValue();
-		}
 		byte[] result = Arrays.copyOfRange(bytes, begin, end);
 		return ByteBuffer.wrap(result).getInt();
 	}
 	
 	/**
-	 * 
+	 *
 	 */
-	private static short getShort(ArrayList<Byte> packet, int begin, int end)
+	private static short getShort(byte[] bytes, int begin, int end)
 	{
-		byte[] bytes = new byte[packet.size()];
-		for (int i = 0; i < packet.size(); i++)
-		{
-			bytes[i] = packet.get(i).byteValue();
-		}
 		byte[] result = Arrays.copyOfRange(bytes, begin, end);
 		return ByteBuffer.wrap(result).getShort();
 	}
 	
 	/**
-	 * 
+	 *
 	 */
-	private static String getString(ArrayList<Byte> packet, int begin, int end)
+	private static String getString(byte[] bytes, int begin, int end)
 	{
-		byte[] bytes = new byte[packet.size()];
-		for (int i = 0; i < packet.size(); i++)
-		{
-			bytes[i] = packet.get(i).byteValue();
-		}
 		byte[] result = Arrays.copyOfRange(bytes, begin, end);
 		return new String(result);
 	}
 	
+	private static byte[] toByteArray(ArrayList<Byte> bytes)
+	{
+		byte[] arr = new byte[bytes.size()];
+		for (int i = 0; i < bytes.size(); i++)
+		{
+			arr[i] = bytes.get(i);
+		}
+		return arr;
+	}
+	
 	public static String getTagName(int type)
 	{
-		String s = null;
+		String s;
 		switch (type)
 		{
 			case Constant.KEY:
@@ -187,7 +189,7 @@ public class PacketUtils
 	
 	public static String getCmdCodeName(int type)
 	{
-		String s = null;
+		String s;
 		switch (type)
 		{
 			case Constant.AUTHEN:
@@ -212,26 +214,22 @@ public class PacketUtils
 		return s;
 	}
 	
-	/**
-	 * @throws IOException
-	 * 
-	 */
 	public static TcpPacket readByte(DataInputStream in) throws IOException
 	{
-		ArrayList<Byte> packet = new ArrayList<>();
+		ArrayList<Byte> bytes = new ArrayList<>();
 		byte count;
 		try
 		{
 			while ((count = in.readByte()) != -1)
 			{
-				packet.add(count);
+				bytes.add(count);
 			}
 		}
 		catch (EOFException e)
 		{
 		}
 		
-		return PacketUtils.getPacket(packet);
+		return PacketUtils.getPacket(bytes);
 	}
 	
 }

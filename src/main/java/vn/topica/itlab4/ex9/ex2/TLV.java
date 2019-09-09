@@ -1,18 +1,12 @@
 package vn.topica.itlab4.ex9.ex2;
 
-import java.io.Serializable;
-
 /**
  *
  * @author ManhHd
  *
  */
-public class TLV implements Serializable
+public class TLV
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5518072466609736448L;
 	private short tag;
 	private short length;
 	private String value;

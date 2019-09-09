@@ -1,6 +1,5 @@
 package vn.topica.itlab4.ex9.ex2;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -8,13 +7,8 @@ import java.util.ArrayList;
  * @author ManhHd
  *
  */
-public class TcpPacket implements Serializable
+public class TcpPacket
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -658654098253098757L;
-	
 	private int lengthOfMessage;
 	private short cmdCode;
 	private short version;
@@ -26,6 +20,8 @@ public class TcpPacket implements Serializable
 	 */
 	public TcpPacket()
 	{
+		cmdCode = -1;
+		tlvs = new ArrayList<>();
 	}
 	
 	/**
@@ -45,8 +41,9 @@ public class TcpPacket implements Serializable
 	{
 		cmdCode = (short) code;
 		version = 0;
-		this.setTlvs(new ArrayList<>());
-		this.getTlvs().add(tlv);
+		ArrayList<TLV> tlvs = new ArrayList<>();
+		tlvs.add(tlv);
+		this.setTlvs(tlvs);
 	}
 	
 	public byte[] getByte()
@@ -54,6 +51,9 @@ public class TcpPacket implements Serializable
 		return PacketUtils.getByte(this);
 	}
 	
+	/**
+	 * Print packet to screen as template
+	 */
 	public void printPacket()
 	{
 		StringBuilder sb = new StringBuilder();

@@ -10,23 +10,19 @@ import java.util.Scanner;
 
 public class Client
 {
-	private static TcpPacket packetIn;
-	private static TcpPacket packetOut;
-	
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception
 	{
 		try (Socket socket = new Socket(Constant.HOST, Constant.PORT))
 		{
-			System.out.println("Server is open.");
+			System.out.println("Connected to server");
 			Scanner scanner = new Scanner(System.in);
 			DataInputStream in;
 			DataOutputStream out;
 			
 			boolean run = true;
 			String phoneNumber = "";
-			String key = "";
-			String name = "";
+			String key;
+			String name;
 			ArrayList<TLV> tlvs;
 			int choose = -1;
 			in = new DataInputStream(socket.getInputStream());
@@ -46,12 +42,13 @@ public class Client
 					try
 					{
 						choose = scanner.nextInt();
+						scanner.nextLine();
 						if (choose >= 0 && choose <= 4)
 						{
 							validateInput = true;
 						}
 					}
-					catch (Exception e)
+					catch (Exception ignored)
 					{
 					}
 					if (!validateInput)
@@ -72,11 +69,10 @@ public class Client
 						tlvs = new ArrayList<>();
 						tlvs.add(new TLV(Constant.PHONE_NUMBER, phoneNumber));
 						tlvs.add(new TLV(Constant.KEY, key));
-						packetOut = new TcpPacket(Constant.AUTHEN, tlvs);
+						TcpPacket packetOut = new TcpPacket(Constant.AUTHEN, tlvs);
 						out.write(packetOut.getByte());
-						out.write(-1);
 						
-						packetIn = PacketUtils.readByte(in);
+						TcpPacket packetIn = PacketUtils.readByte(in);
 						packetIn.printPacket();
 						
 						break;
@@ -89,9 +85,8 @@ public class Client
 						tlvs = new ArrayList<>();
 						tlvs.add(new TLV(Constant.PHONE_NUMBER, phoneNumber));
 						tlvs.add(new TLV(Constant.NAME, name));
-						packetOut = new TcpPacket(Constant.AUTHEN, tlvs);
+						packetOut = new TcpPacket(Constant.INSERT, tlvs);
 						out.write(packetOut.getByte());
-						out.write(-1);
 						
 						packetIn = PacketUtils.readByte(in);
 						packetIn.printPacket();
@@ -102,10 +97,8 @@ public class Client
 						System.out.println("Commit...");
 						tlvs = new ArrayList<>();
 						tlvs.add(new TLV(Constant.PHONE_NUMBER, phoneNumber));
-						tlvs.add(new TLV(Constant.NAME, name));
-						packetOut = new TcpPacket(Constant.AUTHEN, tlvs);
+						packetOut = new TcpPacket(Constant.COMMIT, tlvs);
 						out.write(packetOut.getByte());
-						out.write(-1);
 						
 						packetIn = PacketUtils.readByte(in);
 						packetIn.printPacket();
@@ -116,10 +109,8 @@ public class Client
 						System.out.println("Select...");
 						tlvs = new ArrayList<>();
 						tlvs.add(new TLV(Constant.PHONE_NUMBER, phoneNumber));
-						tlvs.add(new TLV(Constant.NAME, name));
-						packetOut = new TcpPacket(Constant.AUTHEN, tlvs);
+						packetOut = new TcpPacket(Constant.SELECT, tlvs);
 						out.write(packetOut.getByte());
-						out.write(-1);
 						
 						packetIn = PacketUtils.readByte(in);
 						packetIn.printPacket();
@@ -127,9 +118,10 @@ public class Client
 						for (TLV tlv : packetIn.getTlvs())
 						{
 							if (tlv.getTag() == Constant.RESULT_CODE
-							        && tlv.getValue().equalsIgnoreCase(Constant.OK_CODE))
+									&& tlv.getValue().equalsIgnoreCase(Constant.OK_CODE))
 							{
 								run = false;
+								break;
 							}
 						}
 						break;
@@ -140,7 +132,6 @@ public class Client
 			}
 			in.close();
 			out.close();
-			socket.close();
 		}
 		catch (ConnectException e)
 		{

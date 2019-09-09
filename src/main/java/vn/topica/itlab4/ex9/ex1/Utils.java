@@ -4,28 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author ManhHD
- *
  */
 public class Utils
 {
 	/**
-	 * 
 	 * Convert Object Device from String
-	 * 
-	 * @param s
-	 * 
+	 *
+	 * @param s            is string value of Device object
+	 * @param standardized is format of name
 	 */
 	public static List<Device> convertObject(String s, boolean standardized)
 	{
-		List<Device> devices = new ArrayList<Device>();
+		List<Device> devices = new ArrayList<>();
 		Device device;
 		String[] arr = s.split("[\r\n]+");
 		
-		for (int i = 0; i < arr.length; i++)
+		for (String value : arr)
 		{
-			String[] attr = arr[i].split(",");
+			String[] attr = value.split(",");
 			device = new Device();
 			device.setCode(attr[0]);
 			device.setName(attr[1]);
@@ -45,6 +42,9 @@ public class Utils
 		return devices;
 	}
 	
+	/**
+	 * Standard string as VietNam name
+	 */
 	public static String standardizedName(String s)
 	{
 		if (s.length() > 0)

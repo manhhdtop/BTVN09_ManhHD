@@ -21,13 +21,11 @@ public class ChildPacket
 		{
 			ChildPacket child = new ChildPacket();
 			child.tag = PacketUtils.toByteArray2(obj.getTag());
-			child.length = PacketUtils.toByteArray2((short) obj.getValue().length());
+			child.length = PacketUtils.toByteArray2((short) obj.getValue().getBytes().length);
 			child.value = obj.getValue().getBytes();
 			childs.add(child);
 		}
 		
-		byte[] packet_data = PacketUtils.concatBytes(childs);
-		
-		return packet_data;
+		return PacketUtils.concatBytes(childs);
 	}
 }

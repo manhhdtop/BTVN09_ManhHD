@@ -5,31 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * A server program which accepts requests from clients to capitalize strings.
- * When
- * a client connects, a new thread is started to handle it. Receiving client
- * data,
- * capitalizing it, and sending the response back is all done on the thread,
- * allowing
- * much greater throughput because more clients can be handled concurrently.
- */
 public class Server
 {
-	
-	/**
-	 * Runs the server. When a client connects, the server spawns a new thread
-	 * to do
-	 * the servicing and immediately returns to listening. The application
-	 * limits the
-	 * number of threads via a thread pool (otherwise millions of clients could
-	 * cause
-	 * the server to run out of resources by allocating too many threads).
-	 */
 	public static void main(String[] args) throws Exception
 	{
 		try (ServerSocket server = new ServerSocket(Constant.PORT))
@@ -43,6 +25,9 @@ public class Server
 		}
 	}
 	
+	/**
+	 * Class Capitalizer is a thread to process a Client
+	 */
 	private static class Capitalizer implements Runnable
 	{
 		private Socket socket;
@@ -69,22 +54,26 @@ public class Server
 				String name = "";
 				ArrayList<TLV> tlvs;
 				
+				// State of this Client
 				State state = State.INIT;
 				boolean run = true;
+				
 				in = new DataInputStream(socket.getInputStream());
 				out = new DataOutputStream(socket.getOutputStream());
 				while (run)
 				{
 					packetIn = PacketUtils.readByte(in);
+					byte[] bytes = packetIn.getByte();
+					packetIn.printPacket();
+					
 					switch (packetIn.getCmdCode())
 					{
-						case 0:
+						case Constant.AUTHEN:
 							for (TLV tlv : packetIn.getTlvs())
 							{
 								if (tlv.getTag() == Constant.PHONE_NUMBER)
 								{
 									phoneNumber = tlv.getValue();
-									System.out.println("Phone pass");
 								}
 								if (tlv.getTag() == Constant.KEY)
 								{
@@ -107,12 +96,20 @@ public class Server
 							}
 							else
 							{
-								packetOut = new TcpPacket(Constant.ERROR, new TLV(Constant.RESULT_CODE, Constant.NA_CODE));
+								packetOut = new TcpPacket(Constant.ERROR,
+										new TLV(Constant.RESULT_CODE, Constant.NA_CODE));
 							}
 							break;
-						case 1:
+						case Constant.INSERT:
 							if (state == State.READY)
 							{
+								for (TLV tlv : packetIn.getTlvs())
+								{
+									if (tlv.getTag() == Constant.NAME)
+									{
+										name = tlv.getValue();
+									}
+								}
 								tlvs = new ArrayList<>();
 								tlvs.add(new TLV(Constant.PHONE_NUMBER, phoneNumber));
 								tlvs.add(new TLV(Constant.RESULT_CODE, Constant.OK_CODE));
@@ -126,7 +123,7 @@ public class Server
 								packetOut = new TcpPacket(Constant.INSERT, tlvs);
 							}
 							break;
-						case 2:
+						case Constant.COMMIT:
 							if (state == State.READY)
 							{
 								tlvs = new ArrayList<>();
@@ -143,7 +140,7 @@ public class Server
 								packetOut = new TcpPacket(Constant.COMMIT, tlvs);
 							}
 							break;
-						case 3:
+						case Constant.SELECT:
 							if (state == State.SELECT)
 							{
 								tlvs = new ArrayList<>();
@@ -151,6 +148,7 @@ public class Server
 								tlvs.add(new TLV(Constant.RESULT_CODE, Constant.OK_CODE));
 								tlvs.add(new TLV(Constant.NAME, name));
 								packetOut = new TcpPacket(Constant.SELECT, tlvs);
+								run = false;
 							}
 							else
 							{
@@ -160,17 +158,20 @@ public class Server
 								packetOut = new TcpPacket(Constant.SELECT, tlvs);
 							}
 							break;
+						default:
+							packetOut = new TcpPacket(Constant.ERROR, new TLV(Constant.RESULT_CODE, Constant.NA_CODE));
+							break;
 					}
 					out.write(packetOut.getByte());
-					out.write(-1);
 				}
 			}
-			catch (
-			
-			IOException e)
+			catch (SocketException e)
+			{
+				System.out.println("Socket closed: " + socket);
+			}
+			catch (IOException e)
 			{
 				System.out.println("Error: " + socket);
-				e.printStackTrace();
 			}
 			finally
 			{
@@ -185,7 +186,6 @@ public class Server
 				{
 					e.printStackTrace();
 				}
-				System.out.println("Closed: " + socket);
 			}
 		}
 		

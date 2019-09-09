@@ -1,24 +1,21 @@
 package vn.topica.itlab4.ex9.ex1;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 
 /**
- *
  * @author ManhHD
- *
  */
 public class FileUtil
 {
 	private static InputStream in = null;
 	private static OutputStream out = null;
 	
+	/**
+	 * Read value from file by path
+	 *
+	 * @param path is path of file to read
+	 */
 	public static String readFile(String path) throws FileNotFoundException
 	{
 		File file = new File(path);
@@ -29,9 +26,14 @@ public class FileUtil
 		
 	}
 	
-	public static String readFile(File file)
+	/**
+	 * Read value from file
+	 *
+	 * @param file is file to read
+	 */
+	private static String readFile(File file)
 	{
-		String s = "";
+		StringBuilder sb = new StringBuilder();
 		if (in == null)
 		{
 			try
@@ -49,31 +51,35 @@ public class FileUtil
 		{
 			while ((k = in.read()) != -1)
 			{
-				s += (char) k;
+				sb.append((char) k);
 			}
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		return s;
+		return sb.toString();
 	}
 	
 	/**
-	 * @param <E>
-	 * 
+	 * Write a list to a file
+	 *
+	 * @param list is list value to write
+	 * @param path is path of file to write
 	 */
-	public static <E> void writeFile(String path, List<E> devices)
+	public static <E> void writeFile(String path, List<E> list)
 	{
 		File file = new File(path);
-		writeFile(file, devices);
+		writeFile(file, list);
 	}
 	
 	/**
-	 * @param <E>
-	 * 
+	 * Write a list to a file
+	 *
+	 * @param list is list value to write
+	 * @param file is file to write
 	 */
-	public static <E> void writeFile(File file, List<E> devices)
+	public static <E> void writeFile(File file, List<E> list)
 	{
 		if (!file.exists())
 		{
@@ -98,7 +104,7 @@ public class FileUtil
 			}
 		}
 		int index = 0;
-		for (E e : devices)
+		for (E e : list)
 		{
 			String s = "";
 			if (e.getClass() == Device.class)
